@@ -4,10 +4,12 @@ const UploadTasks = () => {
   const [taskName, setTaskName] = useState('');
   const [description, setDescription] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
+    setLoading(true);
 
     const taskData = {
       name: taskName,
@@ -15,11 +17,14 @@ const UploadTasks = () => {
     };
 
     try {
-      const response = await fetch('https://mern-agent-backend-1.onrender.com/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(taskData),
-      });
+      const response = await fetch(
+        process.env.REACT_APP_BACKEND_URL || 'https://mern-agent-backend-1.onrender.com/',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(taskData),
+        }
+      );
 
       if (response.ok) {
         setMessage('Task uploaded successfully!');
@@ -31,13 +36,15 @@ const UploadTasks = () => {
           const data = await response.json();
           if (data.message) errorMessage = data.message;
         } catch {
-          // ignore parsing error
+          // ignore JSON parsing error
         }
         setMessage(errorMessage);
       }
     } catch (error) {
       setMessage('Error uploading task');
       console.error('Upload error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,6 +61,7 @@ const UploadTasks = () => {
             value={taskName}
             onChange={(e) => setTaskName(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
         <div>
@@ -63,9 +71,12 @@ const UploadTasks = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
+            disabled={loading}
           ></textarea>
         </div>
-        <button type="submit">Submit Task</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Uploading...' : 'Submit Task'}
+        </button>
       </form>
     </div>
   );
