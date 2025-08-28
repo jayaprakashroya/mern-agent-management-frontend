@@ -26,8 +26,14 @@ const UploadTasks = () => {
         setTaskName('');
         setDescription('');
       } else {
-        const data = await response.json();
-        setMessage(data.message || 'Failed to upload task');
+        let errorMessage = 'Failed to upload task';
+        try {
+          const data = await response.json();
+          if (data.message) errorMessage = data.message;
+        } catch {
+          // ignore parsing error
+        }
+        setMessage(errorMessage);
       }
     } catch (error) {
       setMessage('Error uploading task');
@@ -41,8 +47,9 @@ const UploadTasks = () => {
       {message && <p>{message}</p>}
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Task Name:</label>
+          <label htmlFor="taskName">Task Name:</label>
           <input
+            id="taskName"
             type="text"
             value={taskName}
             onChange={(e) => setTaskName(e.target.value)}
@@ -50,8 +57,9 @@ const UploadTasks = () => {
           />
         </div>
         <div>
-          <label>Description:</label>
+          <label htmlFor="description">Description:</label>
           <textarea
+            id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
